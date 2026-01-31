@@ -1,0 +1,117 @@
+﻿@page "/persons/edit/{Id:int}"
+@inject TranslationService Trad
+@inject IValidator<UpdatePersonDto> Validator
+@inject IPersonService PersonService
+@inject NavigationManager Navigation
+
+<PageTitle>@Trad.Person.Titles["EditTitle"]</PageTitle>
+
+<h1>@Trad.Person.Titles["EditTitle"]</h1>
+
+@if (person == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="@person" OnSubmit="HandleSubmit">
+        <div class="form-group">
+            <label>@Trad.Person.Labels["FirstName"]</label>
+            <InputText @bind-Value="person.FirstName" />
+            <span class="validation-error">@GetError(nameof(person.FirstName))</span>
+        </div>
+
+        <div class="form-group">
+            <label>@Trad.Person.Labels["LastName"]</label>
+            <InputText @bind-Value="person.LastName" />
+            <span class="validation-error">@GetError(nameof(person.LastName))</span>
+        </div>
+
+        <div class="form-group">
+            <label>@Trad.Person.Labels["Email"]</label>
+            <InputText @bind-Value="person.Email" />
+            <span class="validation-error">@GetError(nameof(person.Email))</span>
+        </div>
+
+        <div class="form-group">
+            <label>@Trad.Person.Labels["BirthDate"]</label>
+            <InputDate @bind-Value="person.BirthDate" />
+        </div>
+        <div class="form-group">
+            <label>@Trad.Person.Labels["Gender"]</label>
+            <InputSelect @bind-Value="person.Gender">
+                @foreach (var gender in Enum.GetValues<Gender>())
+                {
+                    <option value="@gender">@gender.ToLocalizedString(Trad.Person.Enums)</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="form-group">
+            <label>@Trad.Person.Labels["Status"]</label>
+            <InputSelect @bind-Value="person.Status">
+                @foreach (var status in Enum.GetValues<PersonStatus>())
+                {
+                    <option value="@status">@status.ToLocalizedString(Trad.Person.Enums)</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit">@Trad.Global.Actions["Save"]</button>
+            <a href="/persons">@Trad.Global.Actions["Cancel"]</a>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private UpdatePersonDto? person;
+    private Dictionary<string, string> errors = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var dto = await PersonService.GetByIdAsync(Id);
+        if (dto != null)
+        {
+            person = new UpdatePersonDto
+            {
+                Id = dto.Id,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
+                BirthDate = dto.BirthDate,
+                Gender = dto.Gender,
+                Status = dto.Status
+            };
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (person == null) return;
+
+        errors.Clear();
+
+        var result = await Validator.ValidateAsync(person);
+
+        if (!result.IsValid)
+        {
+            foreach (var error in result.Errors)
+            {
+                errors[error.PropertyName] = error.ErrorMessage;
+            }
+            return;
+        }
+
+        await PersonService.UpdateAsync(person);
+
+        Navigation.NavigateTo("/persons");
+    }
+
+    private string GetError(string propertyName)
+    {
+        return errors.TryGetValue(propertyName, out var error) ? error : string.Empty;
+    }
+}

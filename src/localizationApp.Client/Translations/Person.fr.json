@@ -1,0 +1,29 @@
+{
+  "Labels": {
+    "FirstName": "Prénom",
+    "LastName": "Nom",
+    "Email": "Email",
+    "BirthDate": "Date de naissance",
+    "Status": "Statut",
+    "Gender": "Genre"
+
+
+  },
+  "Titles": {
+    "PageTitle": "Personnes",
+    "CreateTitle": "Créer une personne",
+    "EditTitle": "Modifier une personne"
+  },
+  "Messages": {
+    "NoPersonFound": "Aucune personne trouvée."
+  },
+  "Enums": {
+    "Status_Active": "Actif",
+    "Status_Inactive": "Inactif",
+    "Status_Pending": "En attente",
+    "Status_Archived": "Archivé",
+    "Gender_Male": "Homme",
+    "Gender_Female": "Femme",
+    "Gender_Other": "Autre"
+  }
+}

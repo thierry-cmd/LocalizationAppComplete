@@ -1,0 +1,25 @@
+﻿@page "/"
+@inject TranslationService Trad
+
+<PageTitle>@Trad.Global.Home["AppTitle"]</PageTitle>
+
+<h1>@Trad.Global.Home["AppTitle"]</h1>
+
+<p class="intro">@Trad.Global.Home["HomeIntro"]</p>
+
+<h2>@Trad.Global.Home["HomeFeatures"]</h2>
+
+<ul class="features-list">
+    <li><i class="bi bi-check-square text-success"></i> @Trad.Global.Home["FeatureEnums"]</li>
+    <li><i class="bi bi-check-square text-success"></i> @Trad.Global.Home["FeatureValidation"]</li>
+    <li><i class="bi bi-check-square text-success"></i> @Trad.Global.Home["FeatureLabels"]</li>
+    <li><i class="bi bi-check-square text-success"></i> @Trad.Global.Home["FeatureDatabase"]</li>
+</ul>
+
+<h2>@Trad.Global.Home["TryIt"]</h2>
+
+<p>@Trad.Global.Home["TryItDescription"]</p>
+
+<p>
+    <a href="/persons" class="btn btn-success">@Trad.Person.Titles["PageTitle"] <i class="bi bi-arrow-right"></i></a>
+</p>

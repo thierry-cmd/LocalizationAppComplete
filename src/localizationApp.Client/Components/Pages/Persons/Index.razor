@@ -1,0 +1,62 @@
+﻿@page "/persons"
+@inject TranslationService Trad
+@inject IPersonService PersonService
+
+<PageTitle>@Trad.Person.Titles["PageTitle"]</PageTitle>
+
+<h1>@Trad.Person.Titles["PageTitle"]</h1>
+
+<p>
+    <a href="/persons/create" class="btn btn-success">@Trad.Global.Actions["Create"]</a>
+</p>
+
+@if (persons == null)
+{
+    <p>Loading...</p>
+}
+else if (!persons.Any())
+{
+    <p>@Trad.Person.Messages["NoPersonFound"]</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>@Trad.Person.Labels["FirstName"]</th>
+                <th>@Trad.Person.Labels["LastName"]</th>
+                <th>@Trad.Person.Labels["Email"]</th>
+                <th>@Trad.Person.Labels["BirthDate"]</th>
+                <th>@Trad.Person.Labels["Gender"]</th>
+                <th>@Trad.Person.Labels["Status"]</th>
+                <th>@Trad.Global.Actions["Edit"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var person in persons)
+            {
+                <tr>
+                    <td>@person.FirstName</td>
+                    <td>@person.LastName</td>
+                    <td>@person.Email</td>
+                    <td>@person.BirthDate?.ToShortDateString()</td>
+                    <td>@person.Gender.ToLocalizedString(Trad.Person.Enums)</td>
+                    <td>@person.Status.ToLocalizedString(Trad.Person.Enums)</td>
+                    <td>
+                        <a href="/persons/edit/@person.Id">@Trad.Global.Actions["Edit"]</a>
+                        <a href="/persons/delete/@person.Id">@Trad.Global.Actions["Delete"]</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<PersonDto>? persons;
+
+    protected override async Task OnInitializedAsync()
+    {
+        persons = await PersonService.GetAllAsync();
+    }
+}

@@ -1,0 +1,36 @@
+{
+  "Actions": {
+    "Save": "Save",
+    "Cancel": "Cancel",
+    "Create": "Create",
+    "Edit": "Edit",
+    "Delete": "Delete",
+    "Yes": "Yes",
+    "No": "No"
+  },
+  "Navigation": {
+    "Home": "Home",
+    "About": "About",
+    "Language": "Language"
+  },
+  "Messages": {
+    "ConfirmDelete": "Are you sure you want to delete this item?",
+    "NoRecords": "No records found."
+  },
+  "Validation": {
+    "Required": "This field is required.",
+    "MaxLength": "Maximum {0} characters allowed.",
+    "InvalidEmail": "Please enter a valid email address."
+  },
+  "Home": {
+    "AppTitle": "Person Management",
+    "HomeIntro": "Sample application demonstrating translation management with Blazor Server and JSON files.",
+    "HomeFeatures": "Features",
+    "FeatureEnums": "Enum translation (see Person Status: Active, Inactive, Pending)",
+    "FeatureValidation": "Validation messages translation with FluentValidation",
+    "FeatureLabels": "Labels and descriptions translation for forms and tables",
+    "FeatureDatabase": "All translations stored in JSON files (versionable with Git)",
+    "TryIt": "Try it!",
+    "TryItDescription": "Change the language in the top right corner and navigate to the People page to see translations in action."
+  }
+}

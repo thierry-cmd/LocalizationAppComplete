@@ -1,0 +1,28 @@
+{
+  "Labels": {
+    "FirstName": "Voornaam",
+    "LastName": "Achternaam",
+    "Email": "E-mail",
+    "BirthDate": "Geboortedatum",
+    "Status": "Status",
+    "Gender": "Geslacht"
+
+
+  },
+  "Titles": {
+    "PageTitle": "Personen",
+    "CreateTitle": "Persoon aanmaken",
+    "EditTitle": "Persoon bewerken"
+  },
+  "Messages": {
+    "NoPersonFound": "Geen personen gevonden."
+  },
+  "Enums": {
+    "Status_Active": "Actief",
+    "Status_Inactive": "Inactief",
+    "Status_Pending": "In afwachting",
+    "Gender_Male": "Man",
+    "Gender_Female": "Vrouw",
+    "Gender_Other": "Anders"
+  }
+}

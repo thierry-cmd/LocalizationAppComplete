@@ -1,0 +1,27 @@
+﻿@inject TranslationService Trad
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<div class="culture-selector">
+    <label>@Trad.Global.Navigation["Language"]: </label>
+    <select @bind="Culture" @bind:after="OnCultureChanged">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="nl">Nederlands</option>
+
+    </select>
+</div>
+
+@code {
+    private string Culture { get; set; } = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+
+    private async Task OnCultureChanged()
+    {
+        var currentUri = new Uri(Navigation.Uri).PathAndQuery;
+        var redirectUri = Uri.EscapeDataString(currentUri);
+        var cultureEscaped = Uri.EscapeDataString(Culture);
+        var targetUrl = $"/Culture/Set?culture={cultureEscaped}&redirectUri={redirectUri}";
+
+        await JS.InvokeVoidAsync("window.location.assign", targetUrl);
+    }
+}

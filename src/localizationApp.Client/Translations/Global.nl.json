@@ -1,0 +1,36 @@
+{
+  "Actions": {
+    "Save": "Opslaan",
+    "Cancel": "Annuleren",
+    "Create": "Aanmaken",
+    "Edit": "Bewerken",
+    "Delete": "Verwijderen",
+    "Yes": "Ja",
+    "No": "Nee"
+  },
+  "Navigation": {
+    "Home": "Home",
+    "About": "Over",
+    "Language": "Taal"
+  },
+  "Messages": {
+    "ConfirmDelete": "Weet u zeker dat u dit item wilt verwijderen?",
+    "NoRecords": "Geen gegevens gevonden."
+  },
+  "Validation": {
+    "Required": "Dit veld is verplicht.",
+    "MaxLength": "Maximaal {0} tekens toegestaan.",
+    "InvalidEmail": "Voer een geldig e-mailadres in."
+  },
+  "Home": {
+    "AppTitle": "Persoonsbeheer",
+    "HomeIntro": "Voorbeeldapplicatie voor vertalingsbeheer met Blazor Server en JSON-bestanden.",
+    "HomeFeatures": "Functies",
+    "FeatureEnums": "Enum-vertaling (zie Persoon Status: Actief, Inactief, In afwachting)",
+    "FeatureValidation": "Validatieberichten vertaling met FluentValidation",
+    "FeatureLabels": "Labels en beschrijvingen vertaling voor formulieren en tabellen",
+    "FeatureDatabase": "Alle vertalingen opgeslagen in JSON-bestanden (versiebeheer met Git)",
+    "TryIt": "Probeer het!",
+    "TryItDescription": "Wijzig de taal rechtsboven en navigeer naar de Personen-pagina om vertalingen in actie te zien."
+  }
+}

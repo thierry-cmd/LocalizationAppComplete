@@ -1,0 +1,71 @@
+﻿@page "/persons/delete/{Id:int}"
+@inject TranslationService Trad
+@inject IPersonService PersonService
+@inject NavigationManager Navigation
+
+<PageTitle>@Trad.Global.Actions["Delete"]</PageTitle>
+
+<h1>@Trad.Global.Actions["Delete"]</h1>
+
+@if (person == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <p>@Trad.Global.Messages["ConfirmDelete"]</p>
+
+    <table>
+        <tr>
+            <th>@Trad.Person.Labels["FirstName"]</th>
+            <td>@person.FirstName</td>
+        </tr>
+        <tr>
+            <th>@Trad.Person.Labels["LastName"]</th>
+            <td>@person.LastName</td>
+        </tr>
+        <tr>
+            <th>@Trad.Person.Labels["Email"]</th>
+            <td>@person.Email</td>
+        </tr>
+        <tr>
+            <th>@Trad.Person.Labels["BirthDate"]</th>
+            <td>@person.BirthDate?.ToShortDateString()</td>
+        </tr>
+        <tr>
+            <th>@Trad.Person.Labels["Gender"]</th>
+            <td>@person.Gender.ToLocalizedString(Trad.Person.Enums)</td>
+        </tr>
+        <tr>
+            <th>@Trad.Person.Labels["Status"]</th>
+            <td>@person.Status.ToLocalizedString(Trad.Person.Enums)</td>
+        </tr>
+    </table>
+
+    <div class="form-actions">
+        <button @onclick="HandleDelete">@Trad.Global.Actions["Yes"]</button>
+        <a href="/persons">@Trad.Global.Actions["No"]</a>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PersonDto? person;
+
+    protected override async Task OnInitializedAsync()
+    {
+        person = await PersonService.GetByIdAsync(Id);
+    }
+
+    private async Task HandleDelete()
+    {
+        if (person == null) return;
+
+        await PersonService.DeleteAsync(Id);
+
+
+        Navigation.NavigateTo("/persons");
+    }
+}

@@ -1,0 +1,36 @@
+{
+  "Actions": {
+    "Save": "Sauvegarder",
+    "Cancel": "Annuler",
+    "Create": "Créer",
+    "Edit": "Modifier",
+    "Delete": "Supprimer",
+    "Yes": "Oui",
+    "No": "Non"
+  },
+  "Navigation": {
+    "Home": "Accueil",
+    "About": "À propos",
+    "Language": "Langue"
+  },
+  "Messages": {
+    "ConfirmDelete": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+    "NoRecords": "Aucun enregistrement trouvé."
+  },
+  "Validation": {
+    "Required": "Ce champ est requis.",
+    "MaxLength": "Maximum {0} caractères autorisés.",
+    "InvalidEmail": "Veuillez entrer une adresse email valide."
+  },
+  "Home": {
+    "AppTitle": "Gestion des personnes",
+    "HomeIntro": "Application exemple démontrant la gestion des traductions avec Blazor Server et fichiers JSON.",
+    "HomeFeatures": "Fonctionnalités",
+    "FeatureEnums": "Traduction des Enums (voir Statut Personne : Actif, Inactif, En attente)",
+    "FeatureValidation": "Traduction des messages de validation avec FluentValidation",
+    "FeatureLabels": "Traduction des labels et descriptions pour les formulaires et tableaux",
+    "FeatureDatabase": "Toutes les traductions stockées dans des fichiers JSON (versionnable avec Git)",
+    "TryIt": "Essayez !",
+    "TryItDescription": "Changez la langue en haut à droite et naviguez vers la page Personnes pour voir les traductions en action."
+  }
+}
