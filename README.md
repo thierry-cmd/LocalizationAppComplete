@@ -9,44 +9,73 @@ Montrer une approche simple et maintenable pour gérer les traductions :
 - **Fichiers JSON** versionnés avec Git
 - **Structure modulaire** : `@Trad.Module.Category["Key"]`
 - **Multi-langues** : EN, FR, NL (extensible)
+- **Architecture testable** avec services et DTOs
+- **CI/CD** avec GitHub Actions
 
 ## 🏗️ Architecture
 ```
-localizationApp.Client/
-├── Components/
-│   ├── Layout/
-│   │   ├── MainLayout.razor
-│   │   └── NavMenu.razor
-│   ├── Pages/
-│   │   ├── Home.razor
-│   │   └── Persons/
-│   │       ├── Index.razor
-│   │       ├── Create.razor
-│   │       ├── Edit.razor
-│   │       └── Delete.razor
-│   └── CultureSelector.razor
-├── Data/
-│   └── AppDbContext.cs
-├── Extensions/
-│   └── EnumExtensions.cs
-├── Models/
-│   ├── Person.cs
-│   ├── PersonStatus.cs
-│   └── Gender.cs
-├── Services/
-│   └── Translation/
-│       ├── JsonTranslationLoader.cs
-│       ├── CategoryLocalizer.cs
-│       ├── ModuleTranslations.cs
-│       └── TranslationService.cs
-├── Translations/
-│   ├── Global.en.json
-│   ├── Global.fr.json
-│   ├── Global.nl.json
-│   ├── Person.en.json
-│   ├── Person.fr.json
-│   └── Person.nl.json
-└── Program.cs
+LocalizationAppComplete/
+├── src/
+│   ├── localizationApp.Client/          # Application Blazor Server
+│   │   ├── Components/
+│   │   │   ├── Layout/
+│   │   │   │   ├── MainLayout.razor
+│   │   │   │   └── NavMenu.razor
+│   │   │   ├── Pages/
+│   │   │   │   ├── Home.razor
+│   │   │   │   └── Persons/
+│   │   │   │       ├── Index.razor
+│   │   │   │       ├── Create.razor
+│   │   │   │       ├── Edit.razor
+│   │   │   │       └── Delete.razor
+│   │   │   └── CultureSelector.razor
+│   │   ├── Controllers/
+│   │   │   └── CultureController.cs
+│   │   ├── Data/
+│   │   │   └── AppDbContext.cs
+│   │   ├── Extensions/
+│   │   │   └── EnumExtensions.cs
+│   │   ├── Models/
+│   │   │   ├── Person.cs
+│   │   │   ├── PersonStatus.cs
+│   │   │   ├── Gender.cs
+│   │   │   └── Dtos/
+│   │   │       └── PersonDto.cs
+│   │   ├── Services/
+│   │   │   ├── Persons/
+│   │   │   │   ├── IPersonService.cs
+│   │   │   │   └── PersonService.cs
+│   │   │   └── Translation/
+│   │   │       ├── JsonTranslationLoader.cs
+│   │   │       ├── CategoryLocalizer.cs
+│   │   │       ├── ModuleTranslations.cs
+│   │   │       └── TranslationService.cs
+│   │   ├── Translations/
+│   │   │   ├── Global.en.json
+│   │   │   ├── Global.fr.json
+│   │   │   ├── Global.nl.json
+│   │   │   ├── Person.en.json
+│   │   │   ├── Person.fr.json
+│   │   │   └── Person.nl.json
+│   │   ├── Validators/
+│   │   │   └── PersonValidator.cs
+│   │   ├── Dockerfile
+│   │   └── Program.cs
+│   │
+│   └── localizationApp.Tests/           # Tests unitaires
+│       ├── Services/
+│       │   ├── Persons/
+│       │   │   └── PersonServiceTests.cs
+│       │   └── Translation/
+│       │       └── JsonTranslationLoaderTests.cs
+│       └── Validators/
+│           └── CreatePersonDtoValidatorTests.cs
+│
+├── .github/
+│   └── workflows/
+│       └── build-and-test.yml           # CI/CD GitHub Actions
+│
+└── README.md
 ```
 
 ## 🚀 Démarrage
@@ -57,6 +86,40 @@ dotnet run
 
 Ouvrir https://localhost:7288
 
+## 🐳 Docker
+```bash
+# Build l'image
+docker build -t localizationapp .
+
+# Lancer le conteneur
+docker run -p 8080:8080 localizationapp
+```
+
+Ou dans Visual Studio : sélectionner **Docker** dans le menu de lancement.
+
+## 🧪 Tests
+```bash
+cd src/localizationApp.Tests
+dotnet test
+```
+
+### Tests disponibles (14 tests)
+
+| Classe | Tests | Description |
+|--------|-------|-------------|
+| `PersonServiceTests` | 8 | CRUD complet (GetAll, GetById, Create, Update, Delete) |
+| `JsonTranslationLoaderTests` | 5 | Traductions EN/FR/NL, fallback, clé manquante |
+| `CreatePersonDtoValidatorTests` | 1 | Validation des DTOs |
+
+## 🔄 CI/CD
+
+GitHub Actions exécute automatiquement à chaque push :
+1. **Restore** des packages NuGet
+2. **Build** du projet
+3. **Exécution** des 14 tests
+
+Voir l'onglet **Actions** sur GitHub pour le statut.
+
 ## 📁 Structure des fichiers de traduction
 
 Chaque fichier suit le format `Module.culture.json` :
@@ -65,7 +128,8 @@ Chaque fichier suit le format `Module.culture.json` :
 {
   "Labels": {
     "FirstName": "Prénom",
-    "LastName": "Nom"
+    "LastName": "Nom",
+    "Gender": "Genre"
   },
   "Titles": {
     "PageTitle": "Personnes"
@@ -86,6 +150,31 @@ Chaque fichier suit le format `Module.culture.json` :
 <button>@Trad.Global.Actions["Save"]</button>
 <span>@person.Status.ToLocalizedString(Trad.Person.Enums)</span>
 ```
+
+## 🏛️ Architecture en couches
+```
+Pages Razor (UI)
+      │
+      ▼
+IPersonService (Interface)
+      │
+      ▼
+PersonService (Logique métier)
+      │
+      ▼
+AppDbContext (Accès données)
+      │
+      ▼
+SQLite
+```
+
+### DTOs utilisés
+
+| DTO | Usage |
+|-----|-------|
+| `PersonDto` | Lecture (liste, affichage) |
+| `CreatePersonDto` | Création |
+| `UpdatePersonDto` | Modification |
 
 ## ➕ Ajouter une nouvelle langue
 
@@ -131,7 +220,7 @@ public Gender Gender { get; set; } = Gender.Other;
 var prefix = enumTypeName switch
 {
     "PersonStatus" => "Status",
-    "Gender" => "Gender",  // Ajouter cette ligne
+    "Gender" => "Gender",
     _ => enumTypeName
 };
 ```
@@ -216,7 +305,9 @@ public TranslationService(JsonTranslationLoader loader)
 | Performance | Chargé 1x en mémoire au démarrage |
 | Typage | IntelliSense avec `@Trad.Module.Category["Key"]` |
 | Isolation | 1 feature = 1 fichier par langue |
-| Pas de sync | Même fichiers dans tous les environnements |
+| Testable | Services mockables, tests unitaires |
+| CI/CD | Build et tests automatiques |
+| Docker | Déploiement conteneurisé |
 
 ## 🛠️ Technologies
 
@@ -224,4 +315,8 @@ public TranslationService(JsonTranslationLoader loader)
 - Blazor Server
 - Entity Framework Core (SQLite)
 - FluentValidation
+- xUnit (tests unitaires)
+- NSubstitute (mocking)
+- Docker
+- GitHub Actions (CI/CD)
 - Bootstrap 5 + Bootstrap Icons
