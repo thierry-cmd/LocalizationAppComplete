@@ -11,7 +11,8 @@
   "Navigation": {
     "Home": "Home",
     "About": "Over",
-    "Language": "Taal"
+    "Language": "Taal",
+    "AppTitle": "Lokalisatie Demo"
   },
   "Messages": {
     "ConfirmDelete": "Weet u zeker dat u dit item wilt verwijderen?",

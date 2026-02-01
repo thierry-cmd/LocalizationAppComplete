@@ -17,6 +17,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddSingleton<JsonTranslationLoader>();
 builder.Services.AddScoped<TranslationService>();
 
+
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -26,7 +27,12 @@ builder.Services.AddControllers();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddScoped<IPersonService, PersonService>();
+// HttpClient pour appeler l'API
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7189/";
+builder.Services.AddHttpClient<IPersonService, PersonService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
 var app = builder.Build();
 

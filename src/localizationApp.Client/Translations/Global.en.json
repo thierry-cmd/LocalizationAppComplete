@@ -11,7 +11,8 @@
   "Navigation": {
     "Home": "Home",
     "About": "About",
-    "Language": "Language"
+    "Language": "Language",
+    "AppTitle": "Localization Demo"
   },
   "Messages": {
     "ConfirmDelete": "Are you sure you want to delete this item?",

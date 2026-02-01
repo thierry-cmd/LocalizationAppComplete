@@ -1,90 +1,70 @@
-﻿using localizationApp.Client.Data;
-using localizationApp.Client.Models;
-using localizationApp.Client.Models.Dtos;
-using Microsoft.EntityFrameworkCore;
+﻿using localizationApp.Client.Models.Dtos;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace localizationApp.Client.Services.Persons;
 
 public class PersonService : IPersonService
 {
-    private readonly AppDbContext _db;
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<PersonService> _logger;
+    private readonly JsonSerializerOptions _jsonOptions;
 
-    public PersonService(AppDbContext db)
+    public PersonService(HttpClient httpClient, ILogger<PersonService> logger)
     {
-        _db = db;
+        _httpClient = httpClient;
+        _logger = logger;
+        _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter() }
+        };
     }
 
     public async Task<List<PersonDto>> GetAllAsync()
     {
-        return await _db.Persons
-            .Select(p => new PersonDto
-            {
-                Id = p.Id,
-                FirstName = p.FirstName,
-                LastName = p.LastName,
-                Email = p.Email,
-                BirthDate = p.BirthDate,
-                Gender = p.Gender,
-                Status = p.Status
-            })
-            .ToListAsync();
+        _logger.LogInformation("Calling API: GET /api/persons");
+        var result = await _httpClient.GetFromJsonAsync<List<PersonDto>>("api/persons", _jsonOptions);
+        _logger.LogInformation("Retrieved {Count} persons from API", result?.Count ?? 0);
+        return result ?? new List<PersonDto>();
     }
 
     public async Task<PersonDto?> GetByIdAsync(int id)
     {
-        var person = await _db.Persons.FindAsync(id);
-        if (person == null) return null;
-
-        return new PersonDto
+        _logger.LogInformation("Calling API: GET /api/persons/{Id}", id);
+        try
         {
-            Id = person.Id,
-            FirstName = person.FirstName,
-            LastName = person.LastName,
-            Email = person.Email,
-            BirthDate = person.BirthDate,
-            Gender = person.Gender,
-            Status = person.Status
-        };
+            return await _httpClient.GetFromJsonAsync<PersonDto>($"api/persons/{id}", _jsonOptions);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            _logger.LogWarning("Person with Id {Id} not found", id);
+            return null;
+        }
     }
 
     public async Task CreateAsync(CreatePersonDto dto)
     {
-        var person = new Person
-        {
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            Email = dto.Email,
-            BirthDate = dto.BirthDate,
-            Gender = dto.Gender,
-            Status = dto.Status
-        };
-
-        _db.Persons.Add(person);
-        await _db.SaveChangesAsync();
+        _logger.LogInformation("Calling API: POST /api/persons");
+        var response = await _httpClient.PostAsJsonAsync("api/persons", dto, _jsonOptions);
+        response.EnsureSuccessStatusCode();
+        _logger.LogInformation("Person created successfully");
     }
 
     public async Task UpdateAsync(UpdatePersonDto dto)
     {
-        var person = await _db.Persons.FindAsync(dto.Id);
-        if (person == null) return;
-
-        person.FirstName = dto.FirstName;
-        person.LastName = dto.LastName;
-        person.Email = dto.Email;
-        person.BirthDate = dto.BirthDate;
-        person.Gender = dto.Gender;
-        person.Status = dto.Status;
-
-        await _db.SaveChangesAsync();
+        _logger.LogInformation("Calling API: PUT /api/persons/{Id}", dto.Id);
+        var response = await _httpClient.PutAsJsonAsync($"api/persons/{dto.Id}", dto, _jsonOptions);
+        response.EnsureSuccessStatusCode();
+        _logger.LogInformation("Person {Id} updated successfully", dto.Id);
     }
 
     public async Task DeleteAsync(int id)
     {
-        var person = await _db.Persons.FindAsync(id);
-        if (person != null)
-        {
-            _db.Persons.Remove(person);
-            await _db.SaveChangesAsync();
-        }
+        _logger.LogInformation("Calling API: DELETE /api/persons/{Id}", id);
+        var response = await _httpClient.DeleteAsync($"api/persons/{id}");
+        response.EnsureSuccessStatusCode();
+        _logger.LogInformation("Person {Id} deleted successfully", id);
     }
 }

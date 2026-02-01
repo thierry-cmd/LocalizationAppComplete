@@ -6,8 +6,13 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "localizationApp.Client", "src\localizationApp.Client\localizationApp.Client.csproj", "{1423A4BF-27A2-4234-B65A-FA97AA1C6816}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalizationApp.Tests", "src\LocalizationApp.Tests\LocalizationApp.Tests.csproj", "{1142C3B5-A177-4FE3-AF7E-8B38FFEAB2C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "localizationApp.API", "src\localizationApp.API\localizationApp.API.csproj", "{819A635A-7520-4438-9F19-81A0AACB7261}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +28,10 @@ Global
 		{1142C3B5-A177-4FE3-AF7E-8B38FFEAB2C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1142C3B5-A177-4FE3-AF7E-8B38FFEAB2C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1142C3B5-A177-4FE3-AF7E-8B38FFEAB2C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{819A635A-7520-4438-9F19-81A0AACB7261}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{819A635A-7520-4438-9F19-81A0AACB7261}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{819A635A-7520-4438-9F19-81A0AACB7261}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{819A635A-7520-4438-9F19-81A0AACB7261}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
