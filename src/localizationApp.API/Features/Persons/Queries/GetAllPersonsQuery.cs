@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace localizationApp.API.Features.Persons.Queries;
 
-// Query (la requête)
+// Query 
 public record GetAllPersonsQuery : IRequest<List<PersonDto>>;
 
-// Handler (le traitement)
+// Handler
 public class GetAllPersonsHandler : IRequestHandler<GetAllPersonsQuery, List<PersonDto>>
 {
     private readonly AppDbContext _db;

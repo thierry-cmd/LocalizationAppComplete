@@ -1,17 +1,11 @@
 using FluentValidation;
 using localizationApp.Client.Components;
-using localizationApp.Client.Data;
 using localizationApp.Client.Services.Persons;
 using localizationApp.Client.Services.Translation;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// EF Core - Base de données principale (Persons)
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=app.db"));
 
 // Traductions JSON
 builder.Services.AddSingleton<JsonTranslationLoader>();
@@ -35,13 +29,6 @@ builder.Services.AddHttpClient<IPersonService, PersonService>(client =>
 });
 
 var app = builder.Build();
-
-// Créer la base de données
-using (var scope = app.Services.CreateScope())
-{
-    var appDb = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    appDb.Database.EnsureCreated();
-}
 
 // Configuration des cultures
 var supportedCultures = new[]

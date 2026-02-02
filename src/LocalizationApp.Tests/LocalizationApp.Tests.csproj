@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\localizationApp.API\localizationApp.API.csproj" />
     <ProjectReference Include="..\localizationApp.Client\localizationApp.Client.csproj" />
   </ItemGroup>
 
