@@ -1,45 +1,45 @@
 # Localization Demo
 
-Application de démonstration Blazor Server avec localisation JSON et API REST.
+Application Blazor Server avec localisation JSON et API REST.
 
 ![Home Page](screenshots/Screenshot_1.png)
 
-## 🌐 Démo en ligne
+## Démo en ligne
 
 - **Client Blazor** : https://localizationapp-client.azurewebsites.net
 - **API** : https://localizationapp-api.azurewebsites.net/api/persons
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
 ### Client Blazor
-- 🌍 Localisation multilingue (EN, FR, NL) avec fichiers JSON
-- 📝 CRUD complet pour la gestion des personnes
-- ✅ Validation avec FluentValidation
-- 🎨 Interface responsive avec Bootstrap
-- 🔢 Affichage du numéro de version
+- Localisation multilingue (EN, FR, NL) avec fichiers JSON
+- CRUD complet pour la gestion des personnes
+- Validation avec FluentValidation
+- Interface responsive avec Bootstrap
+- Affichage du numéro de version
 
 ### API REST
-- 🏗️ Architecture CQRS avec MediatR
-- 📁 Vertical Slice Architecture
-- ✅ FluentValidation avec Pipeline Behavior
-- 🗺️ Mapping avec Mapster
-- 📖 Documentation Swagger
-- 🔒 Middleware de gestion des exceptions
+- Architecture CQRS avec MediatR
+- Vertical Slice Architecture
+- FluentValidation avec Pipeline Behavior
+- Mapping avec Mapster
+- Documentation Swagger
+- Middleware de gestion des exceptions
 
-## 🛠️ Technologies
+## Technologies
 
 | Technologie | Version |
 |-------------|---------|
 | .NET | 9.0 |
 | Blazor Server | 9.0 |
 | Entity Framework Core | 9.0 |
-| MediatR | Latest |
+| MediatR | 12.x |
 | FluentValidation | 12.x |
-| Mapster | Latest |
+| Mapster | 7.x |
 | SQLite | - |
 | Docker | - |
 
-## 📸 Screenshots
+## Screenshots
 
 ### Sélecteur de langue
 ![Language Selector](screenshots/Screenshot_1.png)
@@ -62,13 +62,13 @@ Application de démonstration Blazor Server avec localisation JSON et API REST.
 ### API Swagger
 ![Swagger](screenshots/Screenshot_7.png)
 
-## 🚀 Démarrage rapide
+## Démarrage rapide
 
 ### Prérequis
 - .NET 9.0 SDK
 - Docker (optionnel)
 
-### Option 1 : Docker Compose (recommandé)
+### Option 1 : Docker Compose
 ```bash
 git clone https://github.com/thierry-cmd/LocalizationAppComplete.git
 cd LocalizationAppComplete
@@ -83,9 +83,9 @@ Accéder à :
 
 1. Ouvrir `LocalizationApp.sln`
 2. Configurer les projets de démarrage multiples (API + Client)
-3. Appuyer sur F5
+3. F5
 
-## 📁 Structure du projet
+## Structure du projet
 ```
 LocalizationApp/
 ├── src/
@@ -113,7 +113,7 @@ LocalizationApp/
 └── README.md
 ```
 
-## 🔌 API Endpoints
+## API Endpoints
 
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
@@ -124,29 +124,27 @@ LocalizationApp/
 | PUT | /api/persons/{id} | Modifie une personne |
 | DELETE | /api/persons/{id} | Supprime une personne |
 
-## 🌍 Localisation
+## Localisation
 
-Les traductions sont stockées dans des fichiers JSON :
+Les traductions sont dans des fichiers JSON :
 ```
 Translations/
-├── Global/
-│   ├── en.json
-│   ├── fr.json
-│   └── nl.json
-└── Person/
-    ├── en.json
-    ├── fr.json
-    └── nl.json
+├── Global.en.json
+├── Global.fr.json
+├── Global.nl.json
+├── Person.en.json
+├── Person.fr.json
+└── Person.nl.json
 ```
 
-Exemple d'utilisation dans Blazor :
+Utilisation dans Blazor :
 ```csharp
 @inject TranslationService Trad
 
 <h1>@Trad.Person.Titles["PageTitle"]</h1>
 ```
 
-## ☁️ Déploiement Azure
+## Déploiement Azure
 
 L'application est déployée sur Azure App Service :
 
@@ -155,7 +153,7 @@ L'application est déployée sur Azure App Service :
 | Client Blazor | https://localizationapp-client.azurewebsites.net |
 | API | https://localizationapp-api.azurewebsites.net |
 
-### Variables d'environnement Azure
+### Variables d'environnement
 
 **Client :**
 - `ApiBaseUrl` : URL de l'API
@@ -164,16 +162,49 @@ L'application est déployée sur Azure App Service :
 **API :**
 - `ASPNETCORE_ENVIRONMENT` : Production
 
-## 🧪 Tests
+## Tests
+
+Le projet contient 67 tests unitaires.
+
+### Lancer les tests
 ```bash
 cd src/localizationApp.Tests
 dotnet test
 ```
 
-## 📝 Licence
+### Ce qui est testé
+
+| Catégorie | Nb tests | Description |
+|-----------|----------|-------------|
+| API Commands | 33 | Create, Update, Delete (handlers + validators) |
+| API Queries | 27 | GetAll, GetById, GetPersonsList |
+| Localisation | 6 | Chargement JSON, fallback anglais |
+| Validation Client | 1 | Validation des DTOs |
+
+### Organisation des tests
+```
+localizationApp.Tests/
+├── Features/
+│   └── Persons/
+│       ├── Commands/
+│       │   ├── CreatePersonCommandTests.cs
+│       │   ├── UpdatePersonCommandTests.cs
+│       │   └── DeletePersonCommandTests.cs
+│       └── Queries/
+│           ├── GetAllPersonsQueryTests.cs
+│           ├── GetPersonByIdQueryTests.cs
+│           └── GetPersonsListQueryTests.cs
+├── Services/
+│   └── Translation/
+│       └── JsonTranslationLoaderTests.cs
+└── Validators/
+    └── CreatePersonDtoValidatorTests.cs
+```
+
+## Licence
 
 MIT
 
-## 👤 Auteur
+## Auteur
 
 Thierry Leblanc
