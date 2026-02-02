@@ -1,5 +1,7 @@
 # Localization Demo
 
+🇫🇷 [Version française](README.fr.md)
+
 A Blazor Server application demonstrating JSON-based localization with a REST API backend.
 
 ![Home Page](screenshots/Screenshot_1.png)

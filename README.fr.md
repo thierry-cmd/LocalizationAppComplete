@@ -1,5 +1,7 @@
 # Démo Localisation
 
+🇬🇧 [English version](README.md)
+
 Application Blazor Server avec localisation JSON et API REST.
 
 ![Page d'accueil](screenshots/Screenshot_1.png)
