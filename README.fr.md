@@ -253,6 +253,24 @@ LocalizationApp/
 
 ## Déploiement Azure
 
+### C'est quoi Azure ?
+
+Azure est la plateforme cloud de Microsoft. Elle offre plein de services, mais pour ce projet on utilise **Azure App Service** - un service d'hébergement managé pour les applications web. Tu déploies ton code, Azure s'occupe du reste (serveurs, mises à jour, scaling).
+
+Plus d'infos : https://azure.microsoft.com/fr-fr
+
+### Pourquoi App Service ?
+
+| Service | Cas d'usage |
+|---------|-------------|
+| Virtual Machines | Contrôle total, tu gères tout |
+| **App Service** | Option la plus simple, pas d'infrastructure à gérer |
+| Kubernetes (AKS) | Orchestration avancée de conteneurs |
+| Container Apps | Conteneurs simplifiés sans Kubernetes |
+| Functions | Code à la demande (événements, webhooks) |
+
+Pour un projet démo comme celui-ci, App Service avec le tier gratuit est parfait.
+
 ### Architecture
 
 ```
@@ -265,40 +283,124 @@ LocalizationApp/
 └──────────────────┘         └──────────────────┘
 ```
 
+### Portail Azure
+
+![Portail Azure](screenshots/Screenshot_8.png)
+
+Le portail Azure est l'endroit où tu gères toutes tes ressources. Va dans **App Services** pour voir tes applications web.
+
+### Nos App Services
+
+![Liste des App Services](screenshots/Screenshot_9.png)
+
+On a deux App Services :
+- `localizationapp-api` - L'API REST
+- `localizationapp-client` - Le frontend Blazor
+
+Les deux sont hébergés dans la région **Belgium Central**, utilisent le tier **Gratuit**, et partagent le même App Service Plan.
+
+### Convention de nommage
+
+En suivant les [bonnes pratiques Azure](https://learn.microsoft.com/fr-be/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming) :
+
+| Ressource | Nom | Pattern |
+|-----------|-----|---------|
+| Resource Group | `rg-localizationapp-dev` | `rg-{app}-{env}` |
+| App Service Plan | `asp-localizationapp-dev-01` | `asp-{app}-{env}-{number}` |
+| Web App (API) | `localizationapp-api` | `{app}-{role}` |
+| Web App (Client) | `localizationapp-client` | `{app}-{role}` |
+
+### Configuration de l'App Service
+
+![Détails App Service](screenshots/Screenshot_10.png)
+
+Les paramètres importants :
+- **Flux de journaux** - Voir les logs en temps réel
+- **Variables d'environnement** - Configurer les paramètres de l'app
+- **Domaine par défaut** - L'URL publique de ton app
+
+### Déploiement depuis Visual Studio
+
+![Visual Studio Publish](screenshots/Screenshot_11.png)
+
+1. Clic droit sur le projet → **Publier**
+2. Sélectionner **Azure** → **Azure App Service (Windows)**
+3. Sélectionner ton abonnement et ton App Service
+4. Cliquer sur **Publier**
+
+Le profil de publication est sauvegardé dans ton projet pour les futurs déploiements.
+
 ### Étapes de déploiement
 
-1. **Créer deux App Services** sur Azure (Tier gratuit F1)
-   - `localizationapp-client`
-   - `localizationapp-api`
+#### 1. Créer un Resource Group
 
-2. **Configurer les variables d'environnement**
+Un Resource Group est un conteneur pour les ressources Azure liées.
 
-   **Pour le Client :**
-   | Nom | Valeur |
-   |-----|--------|
-   | `ApiBaseUrl` | `https://localizationapp-api.azurewebsites.net` |
-   | `ASPNETCORE_ENVIRONMENT` | `Production` |
+1. Aller sur le portail Azure
+2. Cliquer sur **Créer une ressource**
+3. Chercher **Resource Group**
+4. Nom : `rg-localizationapp-dev`
+5. Région : Choisir la plus proche de tes utilisateurs
 
-   **Pour l'API :**
-   | Nom | Valeur |
-   |-----|--------|
-   | `ASPNETCORE_ENVIRONMENT` | `Production` |
+#### 2. Créer un App Service Plan
 
-3. **Configurer CORS sur l'API**
+L'App Service Plan définit les ressources de calcul (VM) pour tes apps.
 
-   L'API doit accepter les requêtes du Client. Dans `Program.cs` :
-   ```csharp
-   policy.WithOrigins(
-       "https://localhost:7288",           // Dev local
-       "http://localhost:5000",            // Docker
-       "https://localizationapp-client.azurewebsites.net"  // Azure
-   )
-   ```
+1. Aller dans **App Service Plans** → **Créer**
+2. Nom : `asp-localizationapp-dev-01`
+3. Région : Même que le Resource Group
+4. Niveau tarifaire : **Free F1** (pour les tests)
 
-4. **Publier depuis Visual Studio**
-   - Clic droit sur le projet → Publier
-   - Sélectionner Azure App Service
-   - Suivre l'assistant
+#### 3. Créer la Web App API
+
+1. Aller dans **App Services** → **Créer**
+2. Nom : `localizationapp-api`
+3. Runtime : **.NET 9**
+4. App Service Plan : Sélectionner celui créé avant
+
+#### 4. Créer la Web App Client
+
+1. Même processus que l'API
+2. Nom : `localizationapp-client`
+3. **Utiliser le même App Service Plan** (économies !)
+
+#### 5. Configurer les variables d'environnement
+
+**Pour le Client :**
+
+Aller dans App Service → **Paramètres** → **Variables d'environnement**
+
+| Nom | Valeur |
+|-----|--------|
+| `ApiBaseUrl` | `https://localizationapp-api.azurewebsites.net` |
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
+
+**Pour l'API :**
+
+| Nom | Valeur |
+|-----|--------|
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
+
+#### 6. Configurer CORS
+
+L'API doit accepter les requêtes du Client. Dans `Program.cs` :
+
+```csharp
+policy.WithOrigins(
+    "https://localhost:7288",           // Dev local
+    "http://localhost:5000",            // Docker
+    "https://localizationapp-client.azurewebsites.net"  // Azure
+)
+```
+
+**Important** : Chaque fois que tu changes l'URL du Client, tu dois mettre à jour CORS sur l'API et republier.
+
+#### 7. Publier depuis Visual Studio
+
+1. Clic droit sur le projet → **Publier**
+2. Sélectionner **Azure App Service**
+3. Suivre l'assistant
+4. Cliquer sur **Publier**
 
 ### Problèmes courants et solutions
 
@@ -314,9 +416,17 @@ LocalizationApp/
 ```
 1. appsettings.json                 ← Configuration de base
 2. appsettings.{Environment}.json   ← Spécifique à l'environnement
-3. Variables d'environnement        ← Surcharge tout (Azure)
+3. Variables d'environnement        ← Surcharge tout (Azure utilise ça)
 4. Arguments de ligne de commande   ← Priorité maximale
 ```
+
+### Tarifs
+
+| Plan | Prix | Cas d'usage |
+|------|------|-------------|
+| Free F1 | Gratuit | Tests, apprentissage |
+| Basic B1 | ~13€/mois | Dev, petites apps |
+| Standard S1 | ~70€/mois | Production |
 
 ---
 

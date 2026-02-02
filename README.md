@@ -253,6 +253,24 @@ LocalizationApp/
 
 ## Azure Deployment
 
+### What is Azure?
+
+Azure is Microsoft's cloud platform. It offers many services, but for this project we use **Azure App Service** - a managed hosting service for web applications. You deploy your code, Azure handles the rest (servers, updates, scaling).
+
+More info: https://azure.microsoft.com
+
+### Why App Service?
+
+| Service | Use case |
+|---------|----------|
+| Virtual Machines | Full control, you manage everything |
+| **App Service** | Simplest option, no infrastructure to manage |
+| Kubernetes (AKS) | Advanced container orchestration |
+| Container Apps | Simplified containers without Kubernetes |
+| Functions | On-demand code (events, webhooks) |
+
+For a demo project like this, App Service with the Free tier is perfect.
+
 ### Architecture
 
 ```
@@ -265,40 +283,124 @@ LocalizationApp/
 └──────────────────┘         └──────────────────┘
 ```
 
-### Deployment Steps
+### Azure Portal
 
-1. **Create two App Services** on Azure (Free tier F1)
-   - `localizationapp-client`
-   - `localizationapp-api`
+![Azure Portal Home](screenshots/Screenshot_8.png)
 
-2. **Configure environment variables**
+The Azure Portal is where you manage all your resources. Go to **App Services** to see your web applications.
 
-   **For the Client:**
-   | Name | Value |
-   |------|-------|
-   | `ApiBaseUrl` | `https://localizationapp-api.azurewebsites.net` |
-   | `ASPNETCORE_ENVIRONMENT` | `Production` |
+### Our App Services
 
-   **For the API:**
-   | Name | Value |
-   |------|-------|
-   | `ASPNETCORE_ENVIRONMENT` | `Production` |
+![App Services List](screenshots/Screenshot_9.png)
 
-3. **Configure CORS on the API**
+We have two App Services:
+- `localizationapp-api` - The REST API
+- `localizationapp-client` - The Blazor frontend
 
-   The API must accept requests from the Client. In `Program.cs`:
-   ```csharp
-   policy.WithOrigins(
-       "https://localhost:7288",           // Local dev
-       "http://localhost:5000",            // Docker
-       "https://localizationapp-client.azurewebsites.net"  // Azure
-   )
-   ```
+Both are hosted in **Belgium Central** region, using the **Free** tier, and share the same App Service Plan.
 
-4. **Publish from Visual Studio**
-   - Right-click on project → Publish
-   - Select Azure App Service
-   - Follow the wizard
+### Resource Naming Convention
+
+Following [Azure best practices](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming):
+
+| Resource | Name | Pattern |
+|----------|------|---------|
+| Resource Group | `rg-localizationapp-dev` | `rg-{app}-{env}` |
+| App Service Plan | `asp-localizationapp-dev-01` | `asp-{app}-{env}-{number}` |
+| Web App (API) | `localizationapp-api` | `{app}-{role}` |
+| Web App (Client) | `localizationapp-client` | `{app}-{role}` |
+
+### App Service Configuration
+
+![App Service Details](screenshots/Screenshot_10.png)
+
+Key settings to note:
+- **Log stream** - View real-time logs
+- **Environment variables** - Configure app settings
+- **Default domain** - Your app's public URL
+
+### Deployment from Visual Studio
+
+![Visual Studio Publish](screenshots/Screenshot_11.png)
+
+1. Right-click on project → **Publish**
+2. Select **Azure** → **Azure App Service (Windows)**
+3. Select your subscription and App Service
+4. Click **Publish**
+
+The publish profile is saved in your project for future deployments.
+
+### Step-by-Step Deployment
+
+#### 1. Create a Resource Group
+
+A Resource Group is a container for related Azure resources.
+
+1. Go to Azure Portal
+2. Click **Create a resource**
+3. Search for **Resource Group**
+4. Name: `rg-localizationapp-dev`
+5. Region: Choose the closest to your users
+
+#### 2. Create an App Service Plan
+
+The App Service Plan defines the compute resources (VM) for your apps.
+
+1. Go to **App Service Plans** → **Create**
+2. Name: `asp-localizationapp-dev-01`
+3. Region: Same as Resource Group
+4. Pricing tier: **Free F1** (for testing)
+
+#### 3. Create the API Web App
+
+1. Go to **App Services** → **Create**
+2. Name: `localizationapp-api`
+3. Runtime: **.NET 9**
+4. App Service Plan: Select the one created above
+
+#### 4. Create the Client Web App
+
+1. Same process as API
+2. Name: `localizationapp-client`
+3. **Use the same App Service Plan** (saves money!)
+
+#### 5. Configure Environment Variables
+
+**For the Client:**
+
+Go to App Service → **Settings** → **Environment variables**
+
+| Name | Value |
+|------|-------|
+| `ApiBaseUrl` | `https://localizationapp-api.azurewebsites.net` |
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
+
+**For the API:**
+
+| Name | Value |
+|------|-------|
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
+
+#### 6. Configure CORS
+
+The API must accept requests from the Client. In `Program.cs`:
+
+```csharp
+policy.WithOrigins(
+    "https://localhost:7288",           // Local dev
+    "http://localhost:5000",            // Docker
+    "https://localizationapp-client.azurewebsites.net"  // Azure
+)
+```
+
+**Important**: Every time you change the Client URL, you must update CORS on the API and republish.
+
+#### 7. Publish from Visual Studio
+
+1. Right-click on project → **Publish**
+2. Select **Azure App Service**
+3. Follow the wizard
+4. Click **Publish**
 
 ### Common Issues and Solutions
 
@@ -314,9 +416,17 @@ LocalizationApp/
 ```
 1. appsettings.json                 ← Base configuration
 2. appsettings.{Environment}.json   ← Environment-specific
-3. Environment variables            ← Overrides everything (Azure)
+3. Environment variables            ← Overrides everything (Azure uses this)
 4. Command line arguments           ← Highest priority
 ```
+
+### Pricing
+
+| Plan | Price | Use case |
+|------|-------|----------|
+| Free F1 | Free | Testing, learning |
+| Basic B1 | ~€13/month | Dev, small apps |
+| Standard S1 | ~€70/month | Production |
 
 ---
 
