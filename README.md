@@ -1,35 +1,88 @@
 # Localization Demo
 
-Application Blazor Server avec localisation JSON et API REST.
+A Blazor Server application demonstrating JSON-based localization with a REST API backend.
 
 ![Home Page](screenshots/Screenshot_1.png)
 
-## Démo en ligne
+## Live Demo
 
-- **Client Blazor** : https://localizationapp-client.azurewebsites.net
-- **API** : https://localizationapp-api.azurewebsites.net/api/persons
+- **Blazor Client**: https://localizationapp-client.azurewebsites.net
+- **API**: https://localizationapp-api.azurewebsites.net/api/persons
 
-## Fonctionnalités
+---
 
-### Client Blazor
-- Localisation multilingue (EN, FR, NL) avec fichiers JSON
-- CRUD complet pour la gestion des personnes
-- Validation avec FluentValidation
-- Interface responsive avec Bootstrap
-- Affichage du numéro de version
+## Why This Project?
 
-### API REST
-- Architecture CQRS avec MediatR
+### The Localization Problem in .NET
+
+The standard approach in .NET for localization uses `.resx` files. While it works, it has some limitations:
+
+| Limitation | Impact |
+|------------|--------|
+| Compiled XML files | Requires recompilation to change a translation |
+| Hard to version | Frequent Git conflicts on XML files |
+| Not readable by non-devs | Translators can't easily edit them |
+| Flat structure | All keys at the same level, no hierarchy |
+| Tooling required | Need Visual Studio or special tools |
+
+### My Solution: JSON Files
+
+I chose JSON files for translations because:
+
+| Advantage | Why it matters |
+|-----------|----------------|
+| No recompilation | Change a JSON file, refresh the page |
+| Git-friendly | JSON = plain text, easy to merge |
+| Readable by anyone | A translator can edit without Visual Studio |
+| Hierarchical structure | Organized by domain (Global, Person, etc.) |
+| Universal standard | JSON is used everywhere (React, Angular, etc.) |
+
+### File Structure
+
+```
+Translations/
+├── Global.en.json    ← Navigation, common buttons
+├── Global.fr.json
+├── Global.nl.json
+├── Person.en.json    ← Labels, messages for Person module
+├── Person.fr.json
+└── Person.nl.json
+```
+
+### Usage in Blazor
+
+```csharp
+@inject TranslationService Trad
+
+<h1>@Trad.Person.Titles["PageTitle"]</h1>
+<label>@Trad.Person.Labels["FirstName"]</label>
+```
+
+---
+
+## Features
+
+### Blazor Client
+- Multi-language support (EN, FR, NL) with JSON files
+- Full CRUD for person management
+- Validation with FluentValidation
+- Responsive UI with Bootstrap
+- Version number display
+
+### REST API
+- CQRS architecture with MediatR
 - Vertical Slice Architecture
-- FluentValidation avec Pipeline Behavior
-- Mapping avec Mapster
-- Documentation Swagger
-- Middleware de gestion des exceptions
+- FluentValidation with Pipeline Behavior
+- Mapping with Mapster
+- Swagger documentation
+- Global exception middleware
+
+---
 
 ## Technologies
 
-| Technologie | Version |
-|-------------|---------|
+| Technology | Version |
+|------------|---------|
 | .NET | 9.0 |
 | Blazor Server | 9.0 |
 | Entity Framework Core | 9.0 |
@@ -39,149 +92,254 @@ Application Blazor Server avec localisation JSON et API REST.
 | SQLite | - |
 | Docker | - |
 
+---
+
 ## Screenshots
 
-### Sélecteur de langue
+### Language Selector
 ![Language Selector](screenshots/Screenshot_1.png)
 
-### Page d'accueil (Français)
+### Home Page (French)
 ![Home FR](screenshots/Screenshot_2.png)
 
-### Liste des personnes
+### Person List
 ![Persons List](screenshots/Screenshot_3.png)
 
-### Formulaire avec validation
+### Form with Validation
 ![Form Validation](screenshots/Screenshot_4.png)
 
-### Modification
+### Edit Form
 ![Edit Form](screenshots/Screenshot_5.png)
 
-### Suppression
+### Delete Confirmation
 ![Delete Confirmation](screenshots/Screenshot_6.png)
 
 ### API Swagger
 ![Swagger](screenshots/Screenshot_7.png)
 
-## Démarrage rapide
+---
 
-### Prérequis
-- .NET 9.0 SDK
-- Docker (optionnel)
+## Getting Started with Docker
 
-### Option 1 : Docker Compose
+### What is Docker?
+
+Docker allows you to run applications in isolated containers. Instead of installing .NET, SQLite, and configuring everything manually, you just run one command and everything works.
+
+### Prerequisites
+
+1. **Install Docker Desktop**
+   - Download from: https://docs.docker.com/get-started/get-docker/
+   - Available for Windows, Mac, and Linux
+   - After installation, make sure Docker Desktop is running
+
+2. **Check that ports 5000 and 5001 are available**
+   - Port 5000: Blazor Client
+   - Port 5001: API
+
+### Running the Application
+
 ```bash
+# Clone the repository
 git clone https://github.com/thierry-cmd/LocalizationAppComplete.git
 cd LocalizationAppComplete
+
+# Build and start the containers
 docker-compose up --build
 ```
 
-Accéder à :
-- Client : http://localhost:5000
-- API : http://localhost:5001/api/persons
+Wait for the build to complete. You'll see logs from both containers. When ready, open:
+- Client: http://localhost:5000
+- API: http://localhost:5001/api/persons
 
-### Option 2 : Visual Studio
+### Docker Commands
 
-1. Ouvrir `LocalizationApp.sln`
-2. Configurer les projets de démarrage multiples (API + Client)
-3. F5
+| Command | Description |
+|---------|-------------|
+| `docker-compose up --build` | Build images and start containers |
+| `docker-compose up` | Start containers (without rebuilding) |
+| `docker-compose down` | Stop and remove containers |
+| `docker-compose down -v` | Stop containers AND delete data |
+| `docker-compose logs -f` | View logs in real-time |
 
-## Structure du projet
+### Data Persistence
+
+The `docker-compose.yml` file includes a volume for the API database:
+
+```yaml
+volumes:
+  - api-data:/app/data
+```
+
+This means:
+- `docker-compose down` → Data is **kept**
+- `docker-compose down -v` → Data is **deleted**
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Docker Network                         │
+│  ┌─────────────────┐         ┌─────────────────┐        │
+│  │     Client      │         │      API        │        │
+│  │   (Port 5000)   │ ──────> │   (Port 5001)   │        │
+│  │                 │  HTTP   │                 │        │
+│  │  Blazor Server  │         │  .NET API       │        │
+│  └─────────────────┘         └────────┬────────┘        │
+│                                       │                 │
+│                              ┌────────▼────────┐        │
+│                              │    SQLite DB    │        │
+│                              │   (Volume)      │        │
+│                              └─────────────────┘        │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Running with Visual Studio
+
+1. Open `LocalizationApp.sln`
+2. Right-click on Solution → Properties
+3. Select "Multiple startup projects"
+4. Set both API and Client to "Start"
+5. Press F5
+
+---
+
+## Project Structure
+
 ```
 LocalizationApp/
 ├── src/
 │   ├── localizationApp.API/
-│   │   ├── Behaviors/          # Pipeline MediatR
+│   │   ├── Behaviors/          # MediatR pipeline
 │   │   ├── Controllers/        # API Controllers
 │   │   ├── Data/               # DbContext
 │   │   ├── Features/           # CQRS (Commands/Queries)
 │   │   │   └── Persons/
 │   │   │       ├── Commands/
 │   │   │       └── Queries/
-│   │   ├── Mapping/            # Configuration Mapster
-│   │   ├── Middleware/         # Exception Handler
-│   │   └── Models/             # Entités et DTOs
+│   │   ├── Mapping/            # Mapster configuration
+│   │   ├── Middleware/         # Exception handler
+│   │   └── Models/             # Entities and DTOs
 │   │
 │   ├── localizationApp.Client/
-│   │   ├── Components/         # Pages et composants Blazor
-│   │   ├── Services/           # Services (HttpClient)
-│   │   ├── Translations/       # Fichiers JSON de traduction
+│   │   ├── Components/         # Blazor pages and components
+│   │   ├── Services/           # Services (HttpClient, Translation)
+│   │   ├── Translations/       # JSON translation files
 │   │   └── Validators/         # FluentValidation
 │   │
-│   └── localizationApp.Tests/  # Tests unitaires
+│   └── localizationApp.Tests/  # Unit tests
 │
 ├── docker-compose.yml
 └── README.md
 ```
 
+---
+
 ## API Endpoints
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | /api/persons | Liste toutes les personnes |
-| GET | /api/persons/{id} | Récupère une personne |
-| GET | /api/persons/list | Liste légère (DTO simplifié) |
-| POST | /api/persons | Crée une personne |
-| PUT | /api/persons/{id} | Modifie une personne |
-| DELETE | /api/persons/{id} | Supprime une personne |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /api/persons | List all persons |
+| GET | /api/persons/{id} | Get a person by ID |
+| GET | /api/persons/list | Light list (simplified DTO) |
+| POST | /api/persons | Create a person |
+| PUT | /api/persons/{id} | Update a person |
+| DELETE | /api/persons/{id} | Delete a person |
 
-## Localisation
+---
 
-Les traductions sont dans des fichiers JSON :
+## Azure Deployment
+
+### Architecture
+
 ```
-Translations/
-├── Global.en.json
-├── Global.fr.json
-├── Global.nl.json
-├── Person.en.json
-├── Person.fr.json
-└── Person.nl.json
-```
-
-Utilisation dans Blazor :
-```csharp
-@inject TranslationService Trad
-
-<h1>@Trad.Person.Titles["PageTitle"]</h1>
+┌──────────────────┐         ┌──────────────────┐
+│   Azure App      │         │   Azure App      │
+│   Service        │ ──────> │   Service        │
+│                  │  HTTPS  │                  │
+│   Client         │         │   API            │
+│   (Free tier)    │         │   (Free tier)    │
+└──────────────────┘         └──────────────────┘
 ```
 
-## Déploiement Azure
+### Deployment Steps
 
-L'application est déployée sur Azure App Service :
+1. **Create two App Services** on Azure (Free tier F1)
+   - `localizationapp-client`
+   - `localizationapp-api`
 
-| Service | URL |
-|---------|-----|
-| Client Blazor | https://localizationapp-client.azurewebsites.net |
-| API | https://localizationapp-api.azurewebsites.net |
+2. **Configure environment variables**
 
-### Variables d'environnement
+   **For the Client:**
+   | Name | Value |
+   |------|-------|
+   | `ApiBaseUrl` | `https://localizationapp-api.azurewebsites.net` |
+   | `ASPNETCORE_ENVIRONMENT` | `Production` |
 
-**Client :**
-- `ApiBaseUrl` : URL de l'API
-- `ASPNETCORE_ENVIRONMENT` : Production
+   **For the API:**
+   | Name | Value |
+   |------|-------|
+   | `ASPNETCORE_ENVIRONMENT` | `Production` |
 
-**API :**
-- `ASPNETCORE_ENVIRONMENT` : Production
+3. **Configure CORS on the API**
+
+   The API must accept requests from the Client. In `Program.cs`:
+   ```csharp
+   policy.WithOrigins(
+       "https://localhost:7288",           // Local dev
+       "http://localhost:5000",            // Docker
+       "https://localizationapp-client.azurewebsites.net"  // Azure
+   )
+   ```
+
+4. **Publish from Visual Studio**
+   - Right-click on project → Publish
+   - Select Azure App Service
+   - Follow the wizard
+
+### Common Issues and Solutions
+
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| 404 Not Found | Wrong `ApiBaseUrl` | Check environment variable in Azure |
+| CORS blocked | Azure URL not allowed | Add URL to CORS policy, republish API |
+| SQLite error in Docker | `/app/data` folder missing | Add `RUN mkdir -p /app/data` in Dockerfile |
+| Data lost on restart | No volume configured | Add volume in docker-compose.yml |
+
+### .NET Configuration Hierarchy
+
+```
+1. appsettings.json                 ← Base configuration
+2. appsettings.{Environment}.json   ← Environment-specific
+3. Environment variables            ← Overrides everything (Azure)
+4. Command line arguments           ← Highest priority
+```
+
+---
 
 ## Tests
 
-Le projet contient 67 tests unitaires.
+The project includes 67 unit tests.
 
-### Lancer les tests
+### Running Tests
+
 ```bash
 cd src/localizationApp.Tests
 dotnet test
 ```
 
-### Ce qui est testé
+### Test Coverage
 
-| Catégorie | Nb tests | Description |
-|-----------|----------|-------------|
+| Category | Tests | Description |
+|----------|-------|-------------|
 | API Commands | 33 | Create, Update, Delete (handlers + validators) |
 | API Queries | 27 | GetAll, GetById, GetPersonsList |
-| Localisation | 6 | Chargement JSON, fallback anglais |
-| Validation Client | 1 | Validation des DTOs |
+| Localization | 6 | JSON loading, English fallback |
+| Client Validation | 1 | DTO validation |
 
-### Organisation des tests
+### Test Structure
+
 ```
 localizationApp.Tests/
 ├── Features/
@@ -201,10 +359,24 @@ localizationApp.Tests/
     └── CreatePersonDtoValidatorTests.cs
 ```
 
-## Licence
+---
+
+## What This Project Demonstrates
+
+- Custom solution when standard tools don't fit the need
+- Understanding of technical trade-offs
+- Modular architecture (separation by domain)
+- Focus on maintainability
+- Docker containerization
+- Cloud deployment (Azure)
+- Unit testing with xUnit
+
+---
+
+## License
 
 MIT
 
-## Auteur
+## Author
 
 Thierry Leblanc
