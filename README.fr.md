@@ -332,39 +332,36 @@ Le profil de publication est sauvegardé dans ton projet pour les futurs déploi
 
 ### Étapes de déploiement
 
-#### 1. Créer un Resource Group
+Tout se fait directement depuis Visual Studio (sauf la création du compte Azure).
 
-Un Resource Group est un conteneur pour les ressources Azure liées.
+#### 1. Créer un compte Azure
 
-1. Aller sur le portail Azure
-2. Cliquer sur **Créer une ressource**
-3. Chercher **Resource Group**
-4. Nom : `rg-localizationapp-dev`
-5. Région : Choisir la plus proche de tes utilisateurs
+Va sur https://azure.microsoft.com/fr-fr et crée un compte gratuit si tu n'en as pas.
 
-#### 2. Créer un App Service Plan
+#### 2. Publier l'API depuis Visual Studio
 
-L'App Service Plan définit les ressources de calcul (VM) pour tes apps.
+1. Clic droit sur `localizationApp.API` → **Publier**
+2. Sélectionner **Azure** → **Suivant**
+3. Sélectionner **Azure App Service (Windows)** → **Suivant**
+4. Cliquer sur **Créer un nouvel Azure App Service**
+5. Remplir le formulaire :
+   - **Nom** : `localizationapp-api`
+   - **Groupe de ressources** : Cliquer sur **Nouveau** → `rg-localizationapp-dev`
+   - **Plan d'hébergement** : Cliquer sur **Nouveau** → `asp-localizationapp-dev-01`, sélectionner **Free F1**
+6. Cliquer sur **Créer**
+7. Cliquer sur **Terminer** puis **Publier**
 
-1. Aller dans **App Service Plans** → **Créer**
-2. Nom : `asp-localizationapp-dev-01`
-3. Région : Même que le Resource Group
-4. Niveau tarifaire : **Free F1** (pour les tests)
+#### 3. Publier le Client depuis Visual Studio
 
-#### 3. Créer la Web App API
+1. Clic droit sur `localizationApp.Client` → **Publier**
+2. Même processus que l'API
+3. **Important** : Sélectionner le **même Groupe de ressources** et le **même Plan d'hébergement** (économies !)
+4. **Nom** : `localizationapp-client`
+5. Cliquer sur **Créer** puis **Publier**
 
-1. Aller dans **App Services** → **Créer**
-2. Nom : `localizationapp-api`
-3. Runtime : **.NET 9**
-4. App Service Plan : Sélectionner celui créé avant
+#### 4. Configurer les variables d'environnement
 
-#### 4. Créer la Web App Client
-
-1. Même processus que l'API
-2. Nom : `localizationapp-client`
-3. **Utiliser le même App Service Plan** (économies !)
-
-#### 5. Configurer les variables d'environnement
+Après la publication, va sur le portail Azure pour configurer les variables d'environnement.
 
 **Pour le Client :**
 
@@ -381,7 +378,7 @@ Aller dans App Service → **Paramètres** → **Variables d'environnement**
 |-----|--------|
 | `ASPNETCORE_ENVIRONMENT` | `Production` |
 
-#### 6. Configurer CORS
+#### 5. Configurer CORS
 
 L'API doit accepter les requêtes du Client. Dans `Program.cs` :
 
@@ -394,13 +391,6 @@ policy.WithOrigins(
 ```
 
 **Important** : Chaque fois que tu changes l'URL du Client, tu dois mettre à jour CORS sur l'API et republier.
-
-#### 7. Publier depuis Visual Studio
-
-1. Clic droit sur le projet → **Publier**
-2. Sélectionner **Azure App Service**
-3. Suivre l'assistant
-4. Cliquer sur **Publier**
 
 ### Problèmes courants et solutions
 

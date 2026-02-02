@@ -332,39 +332,36 @@ The publish profile is saved in your project for future deployments.
 
 ### Step-by-Step Deployment
 
-#### 1. Create a Resource Group
+Everything is done directly from Visual Studio (except creating your Azure account).
 
-A Resource Group is a container for related Azure resources.
+#### 1. Create an Azure Account
 
-1. Go to Azure Portal
-2. Click **Create a resource**
-3. Search for **Resource Group**
-4. Name: `rg-localizationapp-dev`
-5. Region: Choose the closest to your users
+Go to https://azure.microsoft.com and create a free account if you don't have one.
 
-#### 2. Create an App Service Plan
+#### 2. Publish the API from Visual Studio
 
-The App Service Plan defines the compute resources (VM) for your apps.
+1. Right-click on `localizationApp.API` → **Publish**
+2. Select **Azure** → **Next**
+3. Select **Azure App Service (Windows)** → **Next**
+4. Click **Create a new Azure App Service**
+5. Fill in the form:
+   - **Name**: `localizationapp-api`
+   - **Resource Group**: Click **New** → `rg-localizationapp-dev`
+   - **Hosting Plan**: Click **New** → `asp-localizationapp-dev-01`, select **Free F1**
+6. Click **Create**
+7. Click **Finish** then **Publish**
 
-1. Go to **App Service Plans** → **Create**
-2. Name: `asp-localizationapp-dev-01`
-3. Region: Same as Resource Group
-4. Pricing tier: **Free F1** (for testing)
+#### 3. Publish the Client from Visual Studio
 
-#### 3. Create the API Web App
+1. Right-click on `localizationApp.Client` → **Publish**
+2. Same process as the API
+3. **Important**: Select the **same Resource Group** and **same Hosting Plan** (saves money!)
+4. **Name**: `localizationapp-client`
+5. Click **Create** then **Publish**
 
-1. Go to **App Services** → **Create**
-2. Name: `localizationapp-api`
-3. Runtime: **.NET 9**
-4. App Service Plan: Select the one created above
+#### 4. Configure Environment Variables
 
-#### 4. Create the Client Web App
-
-1. Same process as API
-2. Name: `localizationapp-client`
-3. **Use the same App Service Plan** (saves money!)
-
-#### 5. Configure Environment Variables
+After publishing, go to the Azure Portal to set environment variables.
 
 **For the Client:**
 
@@ -381,7 +378,7 @@ Go to App Service → **Settings** → **Environment variables**
 |------|-------|
 | `ASPNETCORE_ENVIRONMENT` | `Production` |
 
-#### 6. Configure CORS
+#### 5. Configure CORS
 
 The API must accept requests from the Client. In `Program.cs`:
 
@@ -394,13 +391,6 @@ policy.WithOrigins(
 ```
 
 **Important**: Every time you change the Client URL, you must update CORS on the API and republish.
-
-#### 7. Publish from Visual Studio
-
-1. Right-click on project → **Publish**
-2. Select **Azure App Service**
-3. Follow the wizard
-4. Click **Publish**
 
 ### Common Issues and Solutions
 
