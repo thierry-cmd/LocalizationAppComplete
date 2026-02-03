@@ -124,6 +124,9 @@ Translations/
 ### API Swagger
 ![Swagger](screenshots/Screenshot_7.png)
 
+### Tableau de santé
+![Tableau de santé](screenshots/Screenshot_12.png)
+
 ---
 
 ## Tableau de santé

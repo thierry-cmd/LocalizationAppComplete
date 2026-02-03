@@ -124,6 +124,9 @@ Translations/
 ### API Swagger
 ![Swagger](screenshots/Screenshot_7.png)
 
+### Health Dashboard
+![Health Dashboard](screenshots/Screenshot_12.png)
+
 ---
 
 ## Health Dashboard
