@@ -1,0 +1,26 @@
+{
+  "Labels": {
+    "ApiStatus": "API-status",
+    "Database": "Database",
+    "ServiceName": "Servicenaam",
+    "Environment": "Omgeving",
+    "Timestamp": "Tijdstempel",
+    "ResponseTime": "Responstijd"
+  },
+  "Titles": {
+    "PageTitle": "Gezondheidsdashboard",
+    "SystemHealth": "Systeemgezondheid",
+    "ServiceInfo": "Service-informatie"
+  },
+  "Status": {
+    "Healthy": "Gezond",
+    "Unhealthy": "Niet beschikbaar",
+    "Checking": "Controleren...",
+    "Unknown": "Onbekend"
+  },
+  "Messages": {
+    "DemoNotice": "Dit dashboard is voor demonstratiedoeleinden. In productie worden health checks gebruikt door de infrastructuur (Docker, Kubernetes, Azure) voor geautomatiseerde monitoring en herstel.",
+    "LastCheck": "Laatste controle",
+    "Refresh": "Vernieuwen"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "Labels": {
+    "ApiStatus": "Statut API",
+    "Database": "Base de données",
+    "ServiceName": "Nom du service",
+    "Environment": "Environnement",
+    "Timestamp": "Horodatage",
+    "ResponseTime": "Temps de réponse"
+  },
+  "Titles": {
+    "PageTitle": "Tableau de santé",
+    "SystemHealth": "Santé du système",
+    "ServiceInfo": "Informations du service"
+  },
+  "Status": {
+    "Healthy": "Opérationnel",
+    "Unhealthy": "Indisponible",
+    "Checking": "Vérification...",
+    "Unknown": "Inconnu"
+  },
+  "Messages": {
+    "DemoNotice": "Ce tableau de bord est à des fins de démonstration. En production, les health checks sont consommés par l'infrastructure (Docker, Kubernetes, Azure) pour la surveillance et la récupération automatisées.",
+    "LastCheck": "Dernière vérification",
+    "Refresh": "Actualiser"
+  }
+}

@@ -33,3 +33,35 @@ public class PersonTranslations
         Enums = new CategoryLocalizer(loader, "Person.Enums");
     }
 }
+
+public class HealthTranslations
+{
+    public CategoryLocalizer Labels { get; }
+    public CategoryLocalizer Titles { get; }
+    public CategoryLocalizer Status { get; }
+    public CategoryLocalizer Messages { get; }
+
+    public HealthTranslations(JsonTranslationLoader loader)
+    {
+        Labels = new CategoryLocalizer(loader, "Health.Labels");
+        Titles = new CategoryLocalizer(loader, "Health.Titles");
+        Status = new CategoryLocalizer(loader, "Health.Status");
+        Messages = new CategoryLocalizer(loader, "Health.Messages");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

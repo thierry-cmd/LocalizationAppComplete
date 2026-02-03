@@ -1,5 +1,6 @@
 using FluentValidation;
 using localizationApp.Client.Components;
+using localizationApp.Client.Services.Health;
 using localizationApp.Client.Services.Persons;
 using localizationApp.Client.Services.Translation;
 using Microsoft.AspNetCore.Localization;
@@ -27,6 +28,12 @@ builder.Services.AddHttpClient<IPersonService, PersonService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
+
+builder.Services.AddHttpClient<IHealthService, HealthService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
 
 var app = builder.Build();
 

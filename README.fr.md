@@ -48,7 +48,10 @@ Translations/
 ├── Global.nl.json
 ├── Person.en.json    ← Labels, messages pour le module Person
 ├── Person.fr.json
-└── Person.nl.json
+├── Person.nl.json
+├── Health.en.json    ← Labels du tableau de santé
+├── Health.fr.json
+└── Health.nl.json
 ```
 
 ### Utilisation dans Blazor
@@ -67,6 +70,7 @@ Translations/
 ### Client Blazor
 - Support multilingue (EN, FR, NL) avec fichiers JSON
 - CRUD complet pour la gestion des personnes
+- Tableau de santé — surveillance visuelle du statut de l'API et de la base de données
 - Validation avec FluentValidation
 - Interface responsive avec Bootstrap
 - Affichage du numéro de version
@@ -75,6 +79,7 @@ Translations/
 - Architecture CQRS avec MediatR
 - Vertical Slice Architecture
 - FluentValidation avec Pipeline Behavior
+- Health checks (`/health`, `/ready`) + informations du service (`/api/info`)
 - Mapping avec Mapster
 - Documentation Swagger
 - Middleware global pour les exceptions
@@ -121,6 +126,68 @@ Translations/
 
 ---
 
+## Tableau de santé
+
+### Pourquoi une page santé ?
+
+En production, les health checks sont invisibles. C'est Docker, Kubernetes ou Azure qui les appellent automatiquement en arrière-plan pour savoir si l'application tourne et si ses dépendances (base de données, services externes, etc.) sont accessibles. Si quelque chose ne va pas, l'infrastructure peut redémarrer le conteneur ou arrêter de lui envoyer du trafic — le tout sans intervention humaine.
+
+Le souci, c'est qu'on ne voit rien de tout ça juste en lisant le code. Alors j'ai ajouté une page "Tableau de santé" dans le client Blazor qui appelle exactement les mêmes endpoints que l'infrastructure utiliserait. C'est à des fins de démonstration, mais ça montre deux choses en même temps : l'implémentation côté backend (middleware de health check, pattern Options, contrôleur dédié) et le travail côté frontend (appels REST depuis Blazor, gestion des états de chargement, affichage des résultats avec des indicateurs visuels).
+
+### Ce que le tableau affiche
+
+La page est accessible à `/health` sur le client. Elle affiche deux cartes de statut :
+
+- **Statut API** — appelle `/health` sur l'API. C'est le check de vivacité (liveness) : il confirme que le processus tourne.
+- **Base de données** — appelle `/ready` sur l'API. C'est le check de disponibilité (readiness) : il essaie vraiment de requêter SQLite pour confirmer que la base est joignable.
+
+En dessous, un tableau récupère les informations du service via `/api/info` : le nom du service, l'environnement en cours, et un horodatage UTC.
+
+Chaque carte passe au vert ou au rouge selon le résultat, et affiche le temps de réponse en millisecondes. Un bouton de rafraîchissement permet de tout relancer à la demande.
+
+### Testez par vous-même
+
+Une fois l'application lancée (Docker ou Visual Studio), tu peux appeler chaque endpoint directement :
+
+| Endpoint | URL (Docker) | Ce qu'il renvoie |
+|----------|--------------|-------------------|
+| Vivacité | http://localhost:5001/health | `Healthy` si le processus API tourne |
+| Disponibilité | http://localhost:5001/ready | `Healthy` si la connexion à la base fonctionne |
+| Infos service | http://localhost:5001/api/info | JSON avec nom du service, environnement, horodatage |
+| Tableau de bord | http://localhost:5000/health | Page visuelle qui appelle les trois endpoints ci-dessus |
+
+Depuis la ligne de commande :
+
+```bash
+# L'API est-elle vivante ?
+curl http://localhost:5001/health
+
+# La base de données est-elle joignable ?
+curl http://localhost:5001/ready
+
+# Infos du service (réponse JSON)
+curl http://localhost:5001/api/info
+```
+
+### Comment c'est construit
+
+**Côté API** — Les health checks utilisent le package intégré `Microsoft.Extensions.Diagnostics.HealthChecks`. Deux vérifications sont enregistrées avec des tags différents : une vérification "self-live" qui retourne toujours Healthy (le processus est debout), et une vérification "database-ready" qui appelle `CanConnect()` sur le contexte SQLite. Le endpoint `/health` filtre sur le tag `live`, `/ready` filtre sur le tag `ready`. Le endpoint `/api/info` est un contrôleur séparé qui lit depuis `AppOptions` (configuré dans `appsettings.json`, surchargeable via variables d'environnement).
+
+**Côté client** — Un `HealthService` appelle ces trois endpoints et enveloppe chaque appel dans un `Stopwatch` pour mesurer la latence. La page `HealthDashboard.razor` consomme ce service et affiche les résultats. Comme tout le reste dans l'app, tous les labels et messages passent par le système de traduction (`Health.en.json`, `Health.fr.json`, `Health.nl.json`).
+
+### HEALTHCHECK Docker
+
+Le Dockerfile de l'API inclut une instruction `HEALTHCHECK` :
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD curl -fsS http://localhost:8080/health || exit 1
+```
+
+Docker exécute ça toutes les 30 secondes. Si ça échoue 3 fois de suite, le conteneur passe en "unhealthy". Dans `docker-compose.yml`, le service client utilise `depends_on` avec `condition: service_healthy`, ce qui veut dire qu'il ne démarrera pas tant que l'API n'a pas passé son premier health check. Plus de situation où le client démarre et essaie d'appeler une API qui n'est pas encore prête.
+
+---
+
 ## Démarrage avec Docker
 
 ### C'est quoi Docker ?
@@ -149,9 +216,10 @@ cd LocalizationAppComplete
 docker-compose up --build
 ```
 
-Attends que la construction se termine. Tu verras les logs des deux conteneurs. Quand c'est prêt, ouvre :
+Attends que la construction se termine. Tu verras l'API démarrer, passer son health check, puis le client démarrera automatiquement. Quand c'est prêt, ouvre :
 - Client : http://localhost:5000
 - API : http://localhost:5001/api/persons
+- Tableau de santé : http://localhost:5000/health
 
 ### Commandes Docker
 
@@ -192,6 +260,9 @@ volumes:
 │                              │    SQLite DB    │        │
 │                              │   (Volume)      │        │
 │                              └─────────────────┘        │
+│                                                         │
+│  Le client attend le health check de l'API avant        │
+│  de démarrer (depends_on → condition: service_healthy)   │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -214,7 +285,7 @@ LocalizationApp/
 ├── src/
 │   ├── localizationApp.API/
 │   │   ├── Behaviors/          # Pipeline MediatR
-│   │   ├── Controllers/        # Contrôleurs API
+│   │   ├── Controllers/        # Contrôleurs API (+ InfoController)
 │   │   ├── Data/               # DbContext
 │   │   ├── Features/           # CQRS (Commands/Queries)
 │   │   │   └── Persons/
@@ -222,12 +293,14 @@ LocalizationApp/
 │   │   │       └── Queries/
 │   │   ├── Mapping/            # Configuration Mapster
 │   │   ├── Middleware/         # Gestionnaire d'exceptions
-│   │   └── Models/             # Entités et DTOs
+│   │   └── Models/             # Entités, DTOs, AppOptions
 │   │
 │   ├── localizationApp.Client/
 │   │   ├── Components/         # Pages et composants Blazor
-│   │   ├── Services/           # Services (HttpClient, Translation)
-│   │   ├── Translations/       # Fichiers JSON de traduction
+│   │   │   └── Pages/
+│   │   │       └── HealthDashboard.razor
+│   │   ├── Services/           # Services (HttpClient, Translation, Health)
+│   │   ├── Translations/       # Fichiers JSON de traduction (incl. Health.xx.json)
 │   │   └── Validators/         # FluentValidation
 │   │
 │   └── localizationApp.Tests/  # Tests unitaires
@@ -248,6 +321,9 @@ LocalizationApp/
 | POST | /api/persons | Créer une personne |
 | PUT | /api/persons/{id} | Modifier une personne |
 | DELETE | /api/persons/{id} | Supprimer une personne |
+| GET | /health | Check de vivacité (le processus API tourne-t-il ?) |
+| GET | /ready | Check de disponibilité (la base est-elle joignable ?) |
+| GET | /api/info | Nom du service, environnement, horodatage |
 
 ---
 
@@ -468,10 +544,11 @@ localizationApp.Tests/
 - Solution personnalisée quand les outils standards ne suffisent pas
 - Compréhension des compromis techniques
 - Architecture modulaire (séparation par domaine)
-- Focus sur la maintenabilité
-- Conteneurisation avec Docker
+- Health checks et surveillance de l'infrastructure
+- Conteneurisation Docker avec orchestration de services
 - Déploiement cloud (Azure)
 - Tests unitaires avec xUnit
+- Focus sur la maintenabilité
 
 ---
 

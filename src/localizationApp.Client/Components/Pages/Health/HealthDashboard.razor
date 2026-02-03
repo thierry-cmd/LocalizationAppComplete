@@ -1,0 +1,149 @@
+﻿@page "/health"
+@inject TranslationService Trad
+@inject IHealthService HealthService
+
+<PageTitle>@Trad.Health.Titles["PageTitle"]</PageTitle>
+
+<h1>@Trad.Health.Titles["PageTitle"]</h1>
+
+<div class="health-notice">
+    <i class="bi bi-info-circle"></i> @Trad.Health.Messages["DemoNotice"]
+</div>
+
+<h2>@Trad.Health.Titles["SystemHealth"]</h2>
+
+<div class="health-cards">
+    <div class="health-card @(liveness?.IsHealthy == true ? "healthy" : liveness == null ? "checking" : "unhealthy")">
+        <div class="health-icon">
+            @if (liveness == null)
+            {
+                <i class="bi bi-hourglass-split"></i>
+            }
+            else if (liveness.IsHealthy)
+            {
+                <i class="bi bi-check-circle-fill"></i>
+            }
+            else
+            {
+                <i class="bi bi-x-circle-fill"></i>
+            }
+        </div>
+        <div class="health-details">
+            <h3>@Trad.Health.Labels["ApiStatus"]</h3>
+            <span class="health-status">
+                @if (liveness == null)
+                {
+                    @Trad.Health.Status["Checking"]
+                }
+                else if (liveness.IsHealthy)
+                {
+                    @Trad.Health.Status["Healthy"]
+                }
+                else
+                {
+                    @Trad.Health.Status["Unhealthy"]
+                }
+            </span>
+            @if (liveness != null)
+            {
+                <span class="response-time">@Trad.Health.Labels["ResponseTime"]: @(liveness.ResponseTimeMs)ms</span>
+            }
+        </div>
+    </div>
+
+    <div class="health-card @(readiness?.IsHealthy == true ? "healthy" : readiness == null ? "checking" : "unhealthy")">
+        <div class="health-icon">
+            @if (readiness == null)
+            {
+                <i class="bi bi-hourglass-split"></i>
+            }
+            else if (readiness.IsHealthy)
+            {
+                <i class="bi bi-check-circle-fill"></i>
+            }
+            else
+            {
+                <i class="bi bi-x-circle-fill"></i>
+            }
+        </div>
+        <div class="health-details">
+            <h3>@Trad.Health.Labels["Database"]</h3>
+            <span class="health-status">
+                @if (readiness == null)
+                {
+                    @Trad.Health.Status["Checking"]
+                }
+                else if (readiness.IsHealthy)
+                {
+                    @Trad.Health.Status["Healthy"]
+                }
+                else
+                {
+                    @Trad.Health.Status["Unhealthy"]
+                }
+            </span>
+            @if (readiness != null)
+            {
+                <span class="response-time">@Trad.Health.Labels["ResponseTime"]: @(readiness.ResponseTimeMs)ms</span>
+            }
+        </div>
+    </div>
+</div>
+
+<h2>@Trad.Health.Titles["ServiceInfo"]</h2>
+
+@if (serviceInfo != null)
+{
+    <table>
+        <tr>
+            <th>@Trad.Health.Labels["ServiceName"]</th>
+            <td>@serviceInfo.ServiceName</td>
+        </tr>
+        <tr>
+            <th>@Trad.Health.Labels["Environment"]</th>
+            <td>@serviceInfo.Environment</td>
+        </tr>
+        <tr>
+            <th>@Trad.Health.Labels["Timestamp"]</th>
+            <td>@serviceInfo.Timestamp.ToString("yyyy-MM-dd HH:mm:ss") UTC</td>
+        </tr>
+    </table>
+}
+else
+{
+    <p>@Trad.Health.Status["Checking"]</p>
+}
+
+<div class="health-footer">
+    <span>@Trad.Health.Messages["LastCheck"]: @lastCheck.ToString("HH:mm:ss")</span>
+    <button @onclick="RefreshAll">
+        <i class="bi bi-arrow-clockwise"></i> @Trad.Health.Messages["Refresh"]
+    </button>
+</div>
+
+@code {
+    private HealthStatus? liveness;
+    private HealthStatus? readiness;
+    private ServiceInfo? serviceInfo;
+    private DateTime lastCheck;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshAll();
+    }
+
+    private async Task RefreshAll()
+    {
+        liveness = null;
+        readiness = null;
+        serviceInfo = null;
+        StateHasChanged();
+
+        liveness = await HealthService.CheckLivenessAsync();
+        readiness = await HealthService.CheckReadinessAsync();
+        serviceInfo = await HealthService.GetServiceInfoAsync();
+        lastCheck = DateTime.Now;
+
+        StateHasChanged();
+    }
+}

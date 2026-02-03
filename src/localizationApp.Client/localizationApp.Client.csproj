@@ -13,6 +13,18 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="Translations\Health.en.json" />
+	  <Content Remove="Translations\Health.fr.json" />
+	  <Content Remove="Translations\Health.nl.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Translations\Health.nl.json" />
+	  <None Include="Translations\Health.en.json" />
+	  <None Include="Translations\Health.fr.json" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="FluentValidation" Version="12.1.1" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />

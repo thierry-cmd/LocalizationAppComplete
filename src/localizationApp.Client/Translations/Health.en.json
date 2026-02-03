@@ -1,0 +1,26 @@
+{
+  "Labels": {
+    "ApiStatus": "API Status",
+    "Database": "Database",
+    "ServiceName": "Service Name",
+    "Environment": "Environment",
+    "Timestamp": "Timestamp",
+    "ResponseTime": "Response Time"
+  },
+  "Titles": {
+    "PageTitle": "Health Dashboard",
+    "SystemHealth": "System Health",
+    "ServiceInfo": "Service Information"
+  },
+  "Status": {
+    "Healthy": "Healthy",
+    "Unhealthy": "Unhealthy",
+    "Checking": "Checking...",
+    "Unknown": "Unknown"
+  },
+  "Messages": {
+    "DemoNotice": "This dashboard is for demonstration purposes. In production, health checks are consumed by infrastructure (Docker, Kubernetes, Azure) for automated monitoring and recovery.",
+    "LastCheck": "Last check",
+    "Refresh": "Refresh"
+  }
+}

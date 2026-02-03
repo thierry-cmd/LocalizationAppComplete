@@ -48,7 +48,10 @@ Translations/
 ├── Global.nl.json
 ├── Person.en.json    ← Labels, messages for Person module
 ├── Person.fr.json
-└── Person.nl.json
+├── Person.nl.json
+├── Health.en.json    ← Health Dashboard labels
+├── Health.fr.json
+└── Health.nl.json
 ```
 
 ### Usage in Blazor
@@ -67,6 +70,7 @@ Translations/
 ### Blazor Client
 - Multi-language support (EN, FR, NL) with JSON files
 - Full CRUD for person management
+- Health Dashboard — visual monitoring of API and database status
 - Validation with FluentValidation
 - Responsive UI with Bootstrap
 - Version number display
@@ -75,6 +79,7 @@ Translations/
 - CQRS architecture with MediatR
 - Vertical Slice Architecture
 - FluentValidation with Pipeline Behavior
+- Health checks (`/health`, `/ready`) + service info (`/api/info`)
 - Mapping with Mapster
 - Swagger documentation
 - Global exception middleware
@@ -121,6 +126,68 @@ Translations/
 
 ---
 
+## Health Dashboard
+
+### Why a health page?
+
+In a real production environment, health checks are invisible. Docker, Kubernetes, or Azure call them automatically behind the scenes to figure out if the application is alive and if its dependencies (database, external APIs, etc.) are reachable. If something goes wrong, the infrastructure can restart the container or stop routing traffic to it — all without human intervention.
+
+The thing is, none of that is visible just by reading the code. So I added a "Health Dashboard" page in the Blazor client that calls the exact same endpoints the infrastructure would use. It's there for demonstration purposes, but it actually shows two things at once: the backend implementation (health check middleware, Options pattern, dedicated controller) and the frontend work (calling REST endpoints from Blazor, handling loading states, rendering results with visual indicators).
+
+### What the dashboard shows
+
+The page is accessible at `/health` on the client. It displays two status cards:
+
+- **API Status** — calls `/health` on the API. This is the liveness check: it confirms the process is running.
+- **Database** — calls `/ready` on the API. This is the readiness check: it actually tries to query SQLite to confirm the database is reachable.
+
+Below that, a table pulls service information from `/api/info`: the service name, which environment is running, and a UTC timestamp.
+
+Each card turns green or red depending on the result, and shows the response time in milliseconds. A refresh button lets you re-run everything on demand.
+
+### Test it yourself
+
+Once the application is running (Docker or Visual Studio), you can hit each endpoint directly:
+
+| Endpoint | URL (Docker) | What it returns |
+|----------|--------------|-----------------|
+| Liveness | http://localhost:5001/health | `Healthy` if the API process is running |
+| Readiness | http://localhost:5001/ready | `Healthy` if the database connection works |
+| Service info | http://localhost:5001/api/info | JSON with service name, environment, timestamp |
+| Dashboard | http://localhost:5000/health | Visual page that calls all three endpoints above |
+
+From the command line:
+
+```bash
+# Is the API alive?
+curl http://localhost:5001/health
+
+# Can it reach the database?
+curl http://localhost:5001/ready
+
+# Service info (JSON response)
+curl http://localhost:5001/api/info
+```
+
+### How it's built
+
+**API side** — Health checks use the built-in `Microsoft.Extensions.Diagnostics.HealthChecks` package. Two checks are registered with different tags: a "self-live" check that always returns Healthy (the process is up), and a "database-ready" check that actually calls `CanConnect()` on the SQLite context. The `/health` endpoint filters on the `live` tag, `/ready` filters on the `ready` tag. The `/api/info` endpoint is a separate controller that reads from `AppOptions` (configured in `appsettings.json`, overridable via environment variables).
+
+**Client side** — A `HealthService` calls these three endpoints and wraps each call in a `Stopwatch` to measure latency. The `HealthDashboard.razor` page consumes this service and renders the results. Like everything else in the app, all labels and messages go through the translation system (`Health.en.json`, `Health.fr.json`, `Health.nl.json`).
+
+### Docker HEALTHCHECK
+
+The API Dockerfile includes a `HEALTHCHECK` instruction:
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD curl -fsS http://localhost:8080/health || exit 1
+```
+
+Docker runs this every 30 seconds. If it fails 3 times in a row, the container gets marked as "unhealthy". In `docker-compose.yml`, the client service uses `depends_on` with `condition: service_healthy`, which means it won't start until the API has actually passed its first health check. No more race conditions where the client boots up and tries to call an API that isn't ready yet.
+
+---
+
 ## Getting Started with Docker
 
 ### What is Docker?
@@ -149,9 +216,10 @@ cd LocalizationAppComplete
 docker-compose up --build
 ```
 
-Wait for the build to complete. You'll see logs from both containers. When ready, open:
+Wait for the build to complete. You'll see the API start, pass its health check, and then the client will start automatically. When ready, open:
 - Client: http://localhost:5000
 - API: http://localhost:5001/api/persons
+- Health Dashboard: http://localhost:5000/health
 
 ### Docker Commands
 
@@ -192,6 +260,9 @@ This means:
 │                              │    SQLite DB    │        │
 │                              │   (Volume)      │        │
 │                              └─────────────────┘        │
+│                                                         │
+│  Client waits for API health check before starting      │
+│  (depends_on → condition: service_healthy)               │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -214,7 +285,7 @@ LocalizationApp/
 ├── src/
 │   ├── localizationApp.API/
 │   │   ├── Behaviors/          # MediatR pipeline
-│   │   ├── Controllers/        # API Controllers
+│   │   ├── Controllers/        # API Controllers (+ InfoController)
 │   │   ├── Data/               # DbContext
 │   │   ├── Features/           # CQRS (Commands/Queries)
 │   │   │   └── Persons/
@@ -222,12 +293,14 @@ LocalizationApp/
 │   │   │       └── Queries/
 │   │   ├── Mapping/            # Mapster configuration
 │   │   ├── Middleware/         # Exception handler
-│   │   └── Models/             # Entities and DTOs
+│   │   └── Models/             # Entities, DTOs, AppOptions
 │   │
 │   ├── localizationApp.Client/
 │   │   ├── Components/         # Blazor pages and components
-│   │   ├── Services/           # Services (HttpClient, Translation)
-│   │   ├── Translations/       # JSON translation files
+│   │   │   └── Pages/
+│   │   │       └── HealthDashboard.razor
+│   │   ├── Services/           # Services (HttpClient, Translation, Health)
+│   │   ├── Translations/       # JSON translation files (incl. Health.xx.json)
 │   │   └── Validators/         # FluentValidation
 │   │
 │   └── localizationApp.Tests/  # Unit tests
@@ -248,6 +321,9 @@ LocalizationApp/
 | POST | /api/persons | Create a person |
 | PUT | /api/persons/{id} | Update a person |
 | DELETE | /api/persons/{id} | Delete a person |
+| GET | /health | Liveness check (is the API process running?) |
+| GET | /ready | Readiness check (is the database reachable?) |
+| GET | /api/info | Service name, environment, timestamp |
 
 ---
 
@@ -468,10 +544,11 @@ localizationApp.Tests/
 - Custom solution when standard tools don't fit the need
 - Understanding of technical trade-offs
 - Modular architecture (separation by domain)
-- Focus on maintainability
-- Docker containerization
+- Health checks and infrastructure monitoring
+- Docker containerization with service orchestration
 - Cloud deployment (Azure)
 - Unit testing with xUnit
+- Focus on maintainability
 
 ---
 
